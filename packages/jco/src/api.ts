@@ -5,6 +5,7 @@ export {
     print,
     parse,
     componentWit,
+    componentWitJson,
     componentNew,
     componentEmbed,
     metadataAdd,

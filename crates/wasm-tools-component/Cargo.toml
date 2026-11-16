@@ -6,11 +6,12 @@ edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
-test = false
 doctest = false
 
 [dependencies]
 anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 wasm-encoder = { workspace = true }
 wasm-metadata = { workspace = true, features = [ "oci" ] }
 wasmparser = { workspace = true }
@@ -18,4 +19,4 @@ wasmprinter = { workspace = true, features = ["component-model"] }
 wat = { workspace = true }
 wit-bindgen = { workspace = true, features = ["macros"] }
 wit-component = { workspace = true }
-wit-parser = { workspace = true }
+wit-parser = { workspace = true, features = ["serde"] }

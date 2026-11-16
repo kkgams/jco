@@ -73,6 +73,21 @@ export async function componentWit(bytes: Uint8Array): Promise<string> {
 }
 
 /**
+ * Decode the full WIT type graph of an executable component as JSON.
+ *
+ * The object contains `world` (the selected world index) and `resolve`
+ * (wit-parser's Resolve serialization). The graph format follows the bundled
+ * wit-parser version; pin the tool version when consuming it.
+ *
+ * @param bytes - WebAssembly component bytes (not an encoded WIT package)
+ * @returns JSON containing the selected world and complete type graph
+ */
+export async function componentWitJson(bytes: Uint8Array): Promise<string> {
+    await $init;
+    return tools.componentWitJson(bytes);
+}
+
+/**
  * Embed WIT metadata in a given WebAssembly binary
  *
  * @param opts - options or performing the embedding

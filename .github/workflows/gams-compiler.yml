@@ -1,0 +1,38 @@
+name: GAMS compiler artifacts
+
+on:
+  push:
+    branches: [gams]
+    tags: ['gams-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compiler:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            build.nosync/cargo-home
+            build.nosync/cargo-target
+            build.nosync/downloads
+          key: compiler-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'flake.lock', 'compiler/inputs.json') }}
+      - name: Test native schema decoding
+        if: startsWith(github.ref, 'refs/tags/') == false
+        run: nix develop --command make test
+      - name: Build the compiler archive once
+        run: nix develop --command make package
+      - name: Publish the exact packaged outputs
+        if: startsWith(github.ref, 'refs/tags/gams-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" build.nosync/jco-transpile.tgz build.nosync/SHA256SUMS --verify-tag --generate-notes --notes-start-tag jco-transpile-v0.24.0

@@ -19,6 +19,13 @@ interface tools {
   /// Extract a *.wit interface from a component, optionally providing a document name to extract
   component-wit: func(binary: list<u8>) -> result<string, string>;
 
+  /// Decode an executable component's full WIT type graph as JSON.
+  /// The object contains `world` (the selected world index) and `resolve`
+  /// (the wit-parser Resolve serialization, as in wasm-tools component wit --json).
+  /// The Resolve JSON format follows the bundled wit-parser version; consumers
+  /// should pin the tool version. WIT packages and malformed binaries are errors.
+  component-wit-json: func(binary: list<u8>) -> result<string, string>;
+
   /// Simple representation of semantic versions
   // see: https://docs.rs/semver/1.0.28/semver/struct.Version.html
   record semver-version {

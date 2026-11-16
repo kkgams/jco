@@ -44,6 +44,7 @@ export const tools: typeof ToolsNamespace = {
     print: call('print'),
     componentNew: call('componentNew'),
     componentWit: call('componentWit'),
+    componentWitJson: call('componentWitJson'),
     componentWitMetadataForWorld: call('componentWitMetadataForWorld'),
     componentEmbed: call('componentEmbed'),
     metadataShow: call('metadataShow'),

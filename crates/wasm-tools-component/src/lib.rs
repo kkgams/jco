@@ -73,6 +73,29 @@ impl Guest for WasmToolsJs {
         Ok(printer.output.to_string())
     }
 
+    fn component_wit_json(binary: Vec<u8>) -> Result<String, String> {
+        if !wasmparser::Parser::is_component(&binary) {
+            return Err("Expected a WebAssembly component".into());
+        }
+        let decoded = wit_component::decode(&binary)
+            .map_err(|error| format!("Failed to decode wit component\n{error:?}"))?;
+        let DecodedWasm::Component(resolve, world) = decoded else {
+            return Err("Expected an executable component, not a WIT package".into());
+        };
+
+        #[derive(serde::Serialize)]
+        struct ComponentWitJson<'a> {
+            world: usize,
+            resolve: &'a Resolve,
+        }
+
+        serde_json::to_string(&ComponentWitJson {
+            world: world.index(),
+            resolve: &resolve,
+        })
+        .map_err(|error| format!("Failed to serialize WIT type graph: {error}"))
+    }
+
     fn component_wit_metadata_for_world(
         wit: WitSpecifier,
         maybe_world_name: Option<String>,
@@ -349,3 +372,6 @@ fn interface_metadata(
         }),
     }))
 }
+
+#[cfg(test)]
+mod tests;

@@ -2040,6 +2040,8 @@ name = "wasm-tools-js"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "serde",
+ "serde_json",
  "wasm-encoder 0.259.0",
  "wasm-metadata",
  "wasmparser 0.259.0",
