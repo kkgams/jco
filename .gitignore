@@ -49,3 +49,6 @@ packages/jco/test/.express-*
 
 # Fork compiler outputs
 /build.nosync/
+
+/tools/
+/gams_modules/

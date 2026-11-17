@@ -25,13 +25,13 @@ class CleanTests(unittest.TestCase):
     def restore(self):
         build.ROOT, build.BUILD = self.original
 
-    def test_clean_removes_known_outputs_and_preserves_unrelated_files(self):
+    def test_clean_removes_entire_disposable_tree(self):
         (build.BUILD / 'work').mkdir()
         (build.BUILD / 'work/generated').write_text('generated')
-        (build.BUILD / 'authored').write_text('keep')
+        (build.BUILD / 'stale').write_text('recreate')
         build.clean()
         self.assertFalse((build.BUILD / 'work').exists())
-        self.assertEqual((build.BUILD / 'authored').read_text(), 'keep')
+        self.assertFalse(build.BUILD.exists())
 
     def test_clean_refuses_tracked_edits_and_credentials(self):
         target = build.BUILD / 'work'

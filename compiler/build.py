@@ -164,11 +164,40 @@ def package():
 
 
 def clean():
+    root = ROOT
     if any((BUILD / 'cargo-home' / name).exists() for name in ['credentials', 'credentials.toml']):
         raise RuntimeError('Refusing to remove a Cargo home containing credentials')
-    for name in ['package', 'work', 'deps', 'downloads', 'cargo-home', 'cargo-target', 'tmp', 'pycache',
-                 'wasm-tools.component.wasm', 'cargo-receipts.jsonl', 'jco-transpile.tgz', 'SHA256SUMS']:
-        remove(BUILD / name)
+    targets = [root / name for name in ("build.nosync", "tools", "gams_modules")]
+    for parent in (root, *root.parents):
+        if parent.is_symlink():
+            raise RuntimeError(f"Refusing symlink ancestor: {parent}")
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "-z", "--", "build.nosync", "tools", "gams_modules"], cwd=root
+    )
+    if tracked:
+        raise RuntimeError("Refusing tracked clean targets")
+    # Preflight every tree before deleting anything, including dangling links.
+    for target in targets:
+        if target.is_symlink():
+            raise RuntimeError(f"Refusing symlink: {target}")
+        if not target.exists():
+            continue
+        if not target.is_dir():
+            raise RuntimeError(f"Refusing non-directory: {target}")
+        def fail(error):
+            raise error
+        for directory, directories, files in os.walk(target, followlinks=False, onerror=fail):
+            for name in directories + files:
+                path = Path(directory) / name
+                if path.is_symlink():
+                    raise RuntimeError(f"Refusing nested symlink: {path}")
+    for target in targets:
+        if target.exists():
+            # Downloaded SDK trees can contain read-only directories.
+            for directory, _, _ in os.walk(target, followlinks=False):
+                directory = Path(directory)
+                directory.chmod(directory.stat().st_mode | 0o700)
+            shutil.rmtree(target)
 
 
 if __name__ == '__main__':

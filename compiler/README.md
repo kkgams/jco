@@ -28,10 +28,15 @@ nix develop --command make package
 | B5 | Packaging checks the actual generated schema API, owned/borrowed distinctions and declared errors. Original package notices are retained; copied license texts for rebuilt Rust dependencies and the Rust standard library accompany the archive. |
 
 All downloaded/intermediate files and Cargo caches are under `build.nosync/`.
-`make clean` removes only the declared output/cache locations, refuses tracked
-files/directory symlinks and refuses a Cargo home containing credentials. Other
-files in `build.nosync/` are preserved. Do not put authored inputs or credentials
-in generated-output locations.
+`make clean` fully removes disposable `build.nosync/`, `tools/` and
+`gams_modules/`, including unmarked/stale output. It preflights every tree before
+deletion and refuses tracked paths, non-directory roots and symlinks (including
+nested/dangling links). It also refuses a Cargo home containing credentials.
+Do not put authored inputs, irreplaceable data or credentials in these trees.
+
+Upstream output locations (`target/`, `dist/`, package output and test directories),
+source/compiler code and upstream commands remain unchanged and are not added to
+this fork-specific clean target.
 
 ## Publish and consume
 
