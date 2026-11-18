@@ -5,18 +5,23 @@
     rust-overlay.url = "github:oxalica/rust-overlay/2ff7d39b901d79ee26d26f9fa32f90511eecaa0e";
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
-  outputs = { nixpkgs, rust-overlay, ... }:
-    let
-      systems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" ];
+  outputs = {
+    nixpkgs,
+    rust-overlay,
+    ...
+  }: let
+    systems = ["x86_64-linux" "aarch64-darwin" "x86_64-darwin"];
+  in {
+    devShells = nixpkgs.lib.genAttrs systems (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [rust-overlay.overlays.default];
+      };
+      rust = pkgs.rust-bin.stable."1.94.1".default.override {targets = ["wasm32-wasip1"];};
     in {
-      devShells = nixpkgs.lib.genAttrs systems (system:
-        let
-          pkgs = import nixpkgs { inherit system; overlays = [ rust-overlay.overlays.default ]; };
-          rust = pkgs.rust-bin.stable."1.94.1".default.override { targets = [ "wasm32-wasip1" ]; };
-        in {
-          default = pkgs.mkShell {
-            packages = [ rust pkgs.nodejs_24 pkgs.python3 pkgs.gnumake pkgs.esbuild pkgs.typescript pkgs.wasm-tools pkgs.cacert pkgs.git ];
-          };
-        });
-    };
+      default = pkgs.mkShell {
+        packages = [rust pkgs.nodejs_24 pkgs.python3 pkgs.gnumake pkgs.esbuild pkgs.typescript pkgs.wasm-tools pkgs.cacert pkgs.git];
+      };
+    });
+  };
 }

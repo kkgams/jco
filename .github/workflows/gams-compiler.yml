@@ -1,6 +1,6 @@
 name: GAMS compiler artifacts
 
-on:
+"on":
   push:
     branches: [gams]
     tags: ['gams-v*']
